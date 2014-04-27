@@ -1,0 +1,87 @@
+
+= file_mode
+
+Author:: Martin Carpenter
+Email:: mcarpenter@free.fr
+Copyright:: Copyright (c) Martin Carpenter 2014
+
+== About
+
+The file_mode gem assists with manipulation of four-octal-digit UNIX
+file modes by providing readable method names rather than error-prone
+bit twiddles. It also provides methods to convert to and from standard
+ls(1)-style long listing formats. The class methods can be used standalone
+or this module can be mixed in to a class that has an integer :mode
+attribute.
+
+== Examples
+
+=== Class method use
+
+    require 'file_mode'
+
+    FileMode.user_readable?(0o644)
+    => true
+    FileMode.setuid?(0o4755)
+    => true
+    FileMode.int_to_listing(0o644)
+    => "rw-r--r--"
+    FileMode.listing_to_str('rwsr-xr-x')
+    => "4755"
+
+=== Mixin use
+
+    require 'file_mode'
+
+    class FileLikeThing
+      include FileMode
+      attr_accessor :mode
+    end
+
+    flt = FileLikeThing.new
+    flt.mode = 0o0644
+    flt.user_readable?
+    => true
+    flt.setuid?
+    => false
+
+== Mode formats
+
+The module offers three forms of mode representation:
+
+* integer (eg 0o0644 or 420 decimal)
+* string ('0644')
+* listing ('rw-r--r--')
+
+Listing formats are not necessarily identical across UNIX-like operating
+systems, or even across applications on the same operating system. A
+case in point is Solaris which shows mandatory file lock permission as
+'l' with standard ls(1) and 'L' with XPG-compatible ls(1).
+
+This module aims to take any standard format as input
+(listing_to_... methods) and targets Linux/GNU coreutils for
+output(..._to_listing methods).
+
+=== Some conversion gotchas
+
+Beware the following standard ruby gotchas when making conversions using
+#to_i and a solitary leading zero to specify octal mode:
+
+    644.to_i
+    => 644       # ok
+    '644'.to_i
+    => 644       # ok
+    0644.to_i
+    => 420       # ok
+    '0644'.to_i
+    => 644       # ! leading zero is ignored
+    '0o644'.to_i
+    => 0         # ! parsing stops at 'o'
+
+== Unit tests
+
+Unit tests are provided particularly for the conversion between the
+ls(1)-style long-listing format and integer representations. Since
+the long-listing format can vary between systems a script
+bin/create_listing_test.rb is provided to generate unit test files.
+
