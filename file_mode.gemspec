@@ -14,6 +14,6 @@ Gem::Specification.new do |s|
   s.rubyforge_project = nil
   s.summary = 'Convert UNIX file permissions'
   s.test_files = FileList["{test}/**/test_*.rb"].to_a
-  s.version = '0.0.1'
+  s.version = '0.0.2'
 end
 
